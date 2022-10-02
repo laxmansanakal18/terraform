@@ -1,0 +1,100 @@
+################################################################################
+######################## Environment = QA ####################################
+################################################################################
+
+stages:
+- stage: Build_QA_Infra
+  variables:
+  - template:  ..\variables\shared.yml
+  - group: 'vars_qa'
+  jobs:
+  - job: Build_QA_Infra
+    displayName: 'Build_QA_Infra'
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - template: ..\shared\deploy-infrastructure-terraform.yml
+
+- stage: BuildApp
+  variables:
+  - template:  ..\variables\shared.yml
+  - group: 'vars_qa'
+  jobs:
+  - job: BuildArtifact
+    displayName: 'BuildArtifact'
+    pool:
+      vmImage: windows-latest
+    steps:
+    - template: ..\shared\build.yml
+
+
+#Application Deployment - QA
+
+- stage: 'Deploy_to_QA'
+  dependsOn:
+    - Build_QA_Infra
+    - BuildApp
+  displayName: 'Deploy to QA'
+  variables:
+  - template:  ..\variables\shared.yml
+  - group: 'vars_qa'
+  jobs:
+  - template: ..\shared\release.yml
+
+################################################################################
+######################## Environment = UAQT ####################################
+################################################################################
+
+- stage: Build_UAT_Infra
+  variables:
+  - template:  ..\variables\shared.yml
+  - template:  ..\variables\uat.yml
+  jobs:
+  - job: Build_UAT_Infra
+    displayName: 'Build_UAT_Infra'
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - template: ..\shared\deploy-infrastructure-terraform.yml
+
+#Application Deployment - UAT
+
+- stage: 'Deploy_to_UAT'
+  dependsOn:
+    - Build_UAT_Infra
+    - BuildApp
+  displayName: 'Deploy to UAT'
+  variables:
+  - template:  ..\variables\shared.yml
+  - template:  ..\variables\uat.yml
+
+  jobs:
+  - template: ..\shared\release.yml
+
+################################################################################
+######################## Environment = Production ##############################
+################################################################################
+
+- stage: Build_PROD_Infra
+  variables:
+  - template:  ..\variables\shared.yml
+  - template:  ..\variables\prod.yml
+  jobs:
+  - job: Build_PROD_Infra
+    displayName: 'Build_PROD_Infra'
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - template: ..\shared\deploy-infrastructure-terraform.yml
+
+#Application Deployment - Production
+
+- stage: 'Deploy_to_Prod'
+  dependsOn: 'Build_PROD_Infra'
+  displayName: 'Deploy to Prod'
+  variables:
+  - template:  ..\variables\shared.yml
+  - template:  ..\variables\prod.yml
+
+  jobs:
+  - template: ..\shared\release.yml

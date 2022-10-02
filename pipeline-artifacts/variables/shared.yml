@@ -1,0 +1,4 @@
+variables:
+  #azure
+  azureServiceConnectionName: 'devops-connection' 
+  location: centralindia

@@ -1,0 +1,10 @@
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+- template:  ..\variables\shared.yml
+
+stages:
+- template:  ..\stages\azure-pipeline-stages.yml

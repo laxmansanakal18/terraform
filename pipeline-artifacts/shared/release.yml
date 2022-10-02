@@ -1,0 +1,23 @@
+jobs:
+  - deployment: deploy
+    displayName: Deploy
+    environment: environment
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@1
+            displayName: Download artifacts
+            inputs:
+              buildType: current
+              downloadType: single
+              artifactName: drop
+              downloadPath: $(Build.ArtifactStagingDirectory)
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Deploy Application'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: "$(azureServiceConnectionName)"
+              appType: 'webApp'
+              WebAppName: "$(appsrcname)"
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'

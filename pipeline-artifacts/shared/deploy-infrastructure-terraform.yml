@@ -1,0 +1,53 @@
+steps:
+  - checkout: self
+  - task: replacetokens@5
+    displayName: 'Replace tokens in **/variables.tf and main.tf'
+    inputs:
+      targetFiles: '**/*.tf'
+      encoding: 'auto'
+      tokenPattern: 'default'
+      writeBOM: true
+      actionOnMissing: 'warn'
+      keepToken: false
+      actionOnNoFiles: 'continue'
+      enableTransforms: false
+      enableRecursion: false
+      useLegacyPattern: false
+      enableTelemetry: false
+  - task: TerraformInstaller@0
+    displayName: 'Terraform: installer'
+    inputs:
+      terraformVersion: 'latest'
+  - task: TerraformTaskV3@3
+    displayName: 'Terraform: init'
+    inputs:
+      provider: 'azurerm'
+      command: init
+      workingDirectory: $(Agent.BuildDirectory)/s/Infrstructure
+      backendServiceArm: $(azureServiceConnectionName)
+      backendAzureRmResourceGroupName: $(staterg)
+      backendAzureRmStorageAccountName: $(statestg)
+      backendAzureRmContainerName: $(statectr)
+      backendAzureRmKey: terraform.tfstate
+  - task: TerraformTaskV3@3
+    displayName: 'Terraform: validate'
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: '$(Agent.BuildDirectory)/s/Infrstructure'
+  - task: TerraformTaskV3@3
+    displayName: 'Terraform: plan'
+    inputs:
+      provider: 'azurerm'
+      command: 'plan'
+      commandOptions: '-out=tfplan'
+      workingDirectory: '$(Agent.BuildDirectory)/s/Infrstructure'
+      environmentServiceNameAzureRM: $(azureServiceConnectionName)
+  - task: TerraformTaskV3@3
+    displayName: 'Terraform: apply'
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      workingDirectory: '$(Agent.BuildDirectory)/s/Infrstructure'
+      commandOptions: '-auto-approve'
+      environmentServiceNameAzureRM: $(azureServiceConnectionName)

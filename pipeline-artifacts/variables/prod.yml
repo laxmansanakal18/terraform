@@ -1,0 +1,27 @@
+variables:
+  env: prod
+
+  resourcegroupname: RG-$(env)
+
+  #azure key vault
+  keyVaultName: <uniquename>
+  kvsku: standard
+
+  #SQL
+  sqladminuser: sqladmin
+  sqladminpsw: <password>
+  sqlservername: <devops-serviceconnection>
+  sqldbname: <uniquename>
+  storageforaudit: storagename$(env)
+  sqlsku: S0
+
+  #azure web app
+  appservicepln: appplan-$(env)
+  appsrcname: servicename-$(env)
+  webapptier: Free
+  webappsize: F1
+
+  #Storage account for terraform state file (backend)
+  staterg: RG-storage
+  statestg: <staccount>
+  statectr: ctnr-name-$(env)
